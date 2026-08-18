@@ -1,6 +1,6 @@
-import { buildMicrositePath } from '@livestock/ui-services'
-import { taxonomy } from '@livestock/taxonomy-death'
-import { species } from '@livestock/species-cattle'
+import { buildMicrositePath } from '@defra/lis-infra-ui-services'
+import { taxonomy } from '@defra/lis-taxonomy-death'
+import { species } from '@defra/lis-species-cattle'
 
 export const homeController = {
   handler(request, h) {
