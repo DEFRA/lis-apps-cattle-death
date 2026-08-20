@@ -21,9 +21,9 @@ export const homeController = {
       taxonomy,
       species,
       signedInAs,
-      directPort: 3207,
+      directPort: 3203,
       hubPath: buildMicrositePath(taxonomy.id, species.id),
-      apiEndpoint: 'http://localhost:3000/api/species/cattle/taxonomies/death'
+      apiEndpoint: 'http://localhost:3228/api/species/cattle/taxonomies/death'
     })
   }
 }

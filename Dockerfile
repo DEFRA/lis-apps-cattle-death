@@ -1,5 +1,5 @@
 ARG PARENT_VERSION=3.0.5-node24.14.1
-ARG PORT=3000
+ARG PORT=3203
 ARG PORT_DEBUG=9229
 
 FROM defradigital/node-development:${PARENT_VERSION} AS development
@@ -13,8 +13,7 @@ ARG PORT_DEBUG
 ENV PORT=${PORT}
 EXPOSE ${PORT} ${PORT_DEBUG}
 
-# A local .npmrc can provide registry configuration without being required in CI.
-COPY --chown=node:node --chmod=755 package*.json .npmrc* ./
+COPY --chown=node:node --chmod=755 package*.json ./
 RUN npm ci
 COPY --chown=node:node --chmod=755 . .
 RUN npm run build:frontend
@@ -39,6 +38,7 @@ USER root
 RUN apk add --no-cache curl
 USER node
 
+COPY --from=production_build /home/node/*.js ./
 COPY --from=production_build /home/node/package*.json ./
 COPY --from=production_build /home/node/src ./src/
 COPY --from=production_build /home/node/.public/ ./.public/

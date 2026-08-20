@@ -32,7 +32,8 @@ Action buildContainerImage = () =>
     RunCommand(
         "docker",
         "buildx build . " +
-        "--file ./Dockerfile --target production " +
+        "--file ./Dockerfile " +
+        "--target production " +
         "--no-cache --provenance=false --sbom=false --load " +
         $"--tag \"{resolvedImageRef}\" " +
         $"--label \"defra.cdp.git.repo.url={serverUrl}/{repository}\" " +

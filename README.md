@@ -6,7 +6,7 @@ Role: Standalone spoke microsite.
 
 Dependencies: @defra/lis-infra-ui-services, @defra/lis-species-cattle, @defra/lis-taxonomy-death
 
-Port: `3207`
+Port: `3203`
 
 Primary URL path: `/cattle/death`
 
