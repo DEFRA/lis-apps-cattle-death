@@ -1,30 +1,36 @@
 import { describe, expect, test, vi } from 'vitest'
 
-const { createModuleAccessGuard, createSpokeGuard, inert } = vi.hoisted(() => ({
-  createModuleAccessGuard: vi.fn(() => ({ plugin: { name: 'module-access' } })),
-  createSpokeGuard: vi.fn(() => null),
-  inert: { plugin: { name: 'inert' } }
-}))
+const { createSpokeAuth, inert, spokeAuthPlugin } = vi.hoisted(() => {
+  const plugin = { plugin: { name: 'spokeAuth' } }
+
+  return {
+    createSpokeAuth: vi.fn(() => plugin),
+    inert: { plugin: { name: 'inert' } },
+    spokeAuthPlugin: plugin
+  }
+})
 
 vi.mock('@hapi/inert', () => ({ default: inert }))
-vi.mock('@defra/lis-hubs-infra-access/auth', () => ({
-  createModuleAccessGuard,
-  createSpokeGuard,
+vi.mock('@defra/lis-hubs-infra-access/authentication', () => ({
+  createSpokeAuth,
   getHubJwtCookieOptions: vi.fn(() => ({}))
 }))
 
 describe('#router', () => {
-  test('registers routes without an auth guard for a public spoke', async () => {
+  test('registers the spoke auth scheme before the routes', async () => {
     const { router } = await import('./router.js')
     const server = { register: vi.fn() }
 
     await router.plugin.register(server)
 
-    expect(createSpokeGuard).toHaveBeenCalledOnce()
-    expect(server.register).toHaveBeenNthCalledWith(
-      3,
-      expect.not.arrayContaining([null])
+    expect(createSpokeAuth).toHaveBeenCalledOnce()
+    expect(createSpokeAuth).toHaveBeenCalledWith(
+      expect.objectContaining({
+        spokeId: 'cattle-death',
+        moduleAccess: expect.objectContaining({ app: 'death' })
+      })
     )
-    expect(server.register.mock.calls[2][0]).toHaveLength(2)
+    expect(server.register).toHaveBeenNthCalledWith(1, [inert, spokeAuthPlugin])
+    expect(server.register.mock.calls[1][0]).toHaveLength(2)
   })
 })

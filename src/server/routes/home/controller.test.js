@@ -1,29 +1,26 @@
 import { statusCodes } from '@defra/lis-infra-ui-services/status-codes'
-import { issueHubJwt } from '@defra/lis-hubs-infra-access/auth'
 
-import { config } from '#config/config.js'
+import { spokeAuth } from '#test-helpers/spoke-auth.js'
 import { createServer } from '#server/server.js'
 import { homeController } from './controller.js'
 
-async function createHubJwt(
-  statements = [{ role: 'lis-role-cattle-death-read', cphs: '*' }]
-) {
-  return issueHubJwt(
+function createUser(
+  statements = [
     {
-      sub: 'test-user',
-      email: 'test.user@example.com',
-      firstName: 'Test',
-      lastName: 'User',
-      statements,
-      serviceId: 'test-service'
-    },
-    {
-      secret: config.get('auth.hubJwt.secret'),
-      issuer: config.get('auth.hubOrigins')[0],
-      audience: config.get('auth.hubJwt.audience'),
-      ttlSeconds: config.get('auth.hubJwt.ttlSeconds')
+      role: 'lis-role-cattle-death-read',
+      cphs: '*',
+      permissions: ['lis-perm-cattle-death-read']
     }
-  )
+  ]
+) {
+  return {
+    sub: 'test-user',
+    email: 'test.user@example.com',
+    firstName: 'Test',
+    lastName: 'User',
+    statements,
+    serviceId: 'test-service'
+  }
 }
 
 describe('#homeController', () => {
@@ -44,10 +41,8 @@ describe('#homeController', () => {
       url: '/'
     }
 
-    const jwt = await createHubJwt()
-    request.headers = {
-      cookie: `${config.get('auth.hubJwt.cookieName')}=${jwt}`
-    }
+    const user = createUser()
+    request.auth = spokeAuth(user)
 
     const { result, statusCode } = await server.inject(request)
 
@@ -56,26 +51,24 @@ describe('#homeController', () => {
     expect(statusCode).toBe(statusCodes.ok)
   })
 
-  test('Should redirect to the hub when the JWT is missing', async () => {
-    const { headers, statusCode } = await server.inject({
+  test('Should reject a request without a hub service token', async () => {
+    const { result, statusCode } = await server.inject({
       method: 'GET',
       url: '/'
     })
 
-    expect(statusCode).toBe(302)
-    expect(headers.location).toContain(
-      `${config.get('auth.hubOrigins')[0]}/auth/login?returnUrl=`
-    )
+    expect(statusCode).toBe(statusCodes.unauthorized)
+    expect(result).toEqual({ message: 'Service authentication required' })
   })
 
   test.each([
     [{ firstName: 'Ada', lastName: 'Lovelace' }, 'Ada Lovelace'],
     [{ sub: 'subject-123' }, 'subject-123'],
     [{}, 'Authenticated user']
-  ])('uses the available signed-in identity', (hubAuth, signedInAs) => {
+  ])('uses the available signed-in identity', (user, signedInAs) => {
     const view = vi.fn()
 
-    homeController.handler({ app: { hubAuth } }, { view })
+    homeController.handler({ auth: { credentials: { user } } }, { view })
 
     expect(view).toHaveBeenCalledWith(
       'home/index',
