@@ -1,4 +1,4 @@
-import { buildMicrositePath } from '@defra/lis-infra-ui-services'
+import { getMountPath } from '@defra/lis-hubs-infra-registry'
 import { taxonomy } from '@defra/lis-taxonomy-death'
 import { species } from '@defra/lis-species-cattle'
 
@@ -18,7 +18,9 @@ export const homeController = {
       species,
       signedInAs,
       directPort: 3203,
-      hubPath: buildMicrositePath(taxonomy.id, species.id),
+      hubPath: getMountPath('cattle-death', 'holding', {
+        cph: request.params.cph
+      }),
       apiEndpoint: 'http://localhost:3228/api/species/cattle/taxonomies/death'
     })
   }
