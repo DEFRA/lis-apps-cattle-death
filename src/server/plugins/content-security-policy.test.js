@@ -15,7 +15,7 @@ describe('#contentSecurityPolicy', () => {
   test('Should set the CSP policy header', async () => {
     const resp = await server.inject({
       method: 'GET',
-      url: '/'
+      url: '/holdings/22/001/0001/cattle/death'
     })
 
     expect(resp.headers['content-security-policy']).toBeDefined()

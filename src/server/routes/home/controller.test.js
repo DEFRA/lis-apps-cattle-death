@@ -38,7 +38,7 @@ describe('#homeController', () => {
   test('Should provide expected response', async () => {
     const request = {
       method: 'GET',
-      url: '/'
+      url: '/holdings/22/001/0001/cattle/death'
     }
 
     const user = createUser()
@@ -54,7 +54,7 @@ describe('#homeController', () => {
   test('Should reject a request without a hub service token', async () => {
     const { result, statusCode } = await server.inject({
       method: 'GET',
-      url: '/'
+      url: '/holdings/22/001/0001/cattle/death'
     })
 
     expect(statusCode).toBe(statusCodes.unauthorized)
@@ -68,7 +68,13 @@ describe('#homeController', () => {
   ])('uses the available signed-in identity', (user, signedInAs) => {
     const view = vi.fn()
 
-    homeController.handler({ auth: { credentials: { user } } }, { view })
+    homeController.handler(
+      {
+        auth: { credentials: { user } },
+        params: { cph: '22/001/0001' }
+      },
+      { view }
+    )
 
     expect(view).toHaveBeenCalledWith(
       'home/index',

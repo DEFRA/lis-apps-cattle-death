@@ -7,7 +7,7 @@ export const home = {
       server.route([
         {
           method: 'GET',
-          path: '/',
+          path: '/holdings/{cph*3}/cattle/death',
           ...homeController
         }
       ])
