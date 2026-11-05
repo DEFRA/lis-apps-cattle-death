@@ -12,8 +12,7 @@ const { createSpokeAuth, inert, spokeAuthPlugin } = vi.hoisted(() => {
 
 vi.mock('@hapi/inert', () => ({ default: inert }))
 vi.mock('@defra/lis-hubs-infra-access/authentication', () => ({
-  createSpokeAuth,
-  getHubJwtCookieOptions: vi.fn(() => ({}))
+  createSpokeAuth
 }))
 
 describe('#router', () => {
