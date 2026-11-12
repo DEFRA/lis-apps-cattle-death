@@ -1,3 +1,4 @@
+/** @import { Server } from '@hapi/hapi' */
 import inert from '@hapi/inert'
 import { createSpokeAuth } from '@defra/lis-hubs-infra-access/authentication'
 
@@ -20,6 +21,10 @@ const spokeAuth = createSpokeAuth({
 export const router = {
   plugin: {
     name: 'router',
+    /**
+     * Registers the plugins and routes for this spoke.
+     * @param {Server} server - The Hapi server
+     */
     async register(server) {
       await server.register([inert, spokeAuth])
 
