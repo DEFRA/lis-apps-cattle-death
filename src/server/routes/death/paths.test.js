@@ -1,4 +1,5 @@
 import {
+  animalOrNewPath,
   animalPagePath,
   deathPath,
   holdingHomePath,
@@ -49,6 +50,30 @@ describe('paths', () => {
     // Arrange
     // Act
     const result = path()
+
+    // Assert
+    expect(result).toBe(expected)
+  })
+})
+
+describe('animalOrNewPath()', () => {
+  test.each([
+    [
+      'an animal the report has',
+      'UK123456301550',
+      '/holdings/10/081/1234/cattle/death/7ZK-M3Q-A9D/animals/UK123456301550/is-registered'
+    ],
+    [
+      'a new animal',
+      undefined,
+      '/holdings/10/081/1234/cattle/death/7ZK-M3Q-A9D/animals/is-registered'
+    ]
+  ])('gives the page of %s', (_description, animalId, expected) => {
+    // Arrange
+    const params = { cph: '10/081/1234', submissionId: '7ZK-M3Q-A9D', animalId }
+
+    // Act
+    const result = animalOrNewPath(params, 'is-registered')
 
     // Assert
     expect(result).toBe(expected)

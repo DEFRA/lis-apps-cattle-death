@@ -1,12 +1,12 @@
 import { statusCodes } from '@defra/lis-infra-ui-services/status-codes'
 import { trimAnswers } from '@defra/lis-infra-ui-services/journey'
 
-import * as animalClient from '#server/services/temporary-be4fe/animal.js'
 import * as submissionClient from '#server/services/temporary-be4fe/submission.js'
 import { deathReport } from '#server/journeys/death/report.js'
+import { answersOf } from '../animal-answers.js'
 import { CHECK_PAGE, isReturningToCheck, keepReturn } from '../check-return.js'
 import { animalPagePath, newAnimalPath } from '../paths.js'
-import { animalOf, reportOf } from '../report-key.js'
+import { reportOf } from '../report-key.js'
 import {
   buildViewModel,
   formValuesFrom,
@@ -17,19 +17,6 @@ import {
 /** @import { DraftDeath } from '#server/services/temporary-be4fe/animal.js' */
 
 const TEMPLATE = 'death/is-registered/index'
-
-/**
- * @param {Request} request
- * @returns {Promise<DraftDeath>} the animal's answers: none for a new animal
- * @throws {Error} not found, for an id the report has no animal under
- */
-async function answersOf(request) {
-  if (request.params.animalId === undefined) {
-    return {}
-  }
-
-  return animalClient.getAnimal(animalOf(request))
-}
 
 /**
  * @param {Request} request

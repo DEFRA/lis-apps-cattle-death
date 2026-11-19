@@ -6,6 +6,7 @@
 import Joi from 'joi'
 import { createJourney } from '@defra/lis-infra-ui-services/journey'
 
+import { registeredAnimalDetailsSchema } from './registered-animal-details.js'
 import {
   isRegisteredSchema,
   REGISTERED,
@@ -14,8 +15,17 @@ import {
 
 /** @import { Step } from '@defra/lis-infra-ui-services/journey' */
 /** @import { DraftDeath } from '#server/services/temporary-be4fe/animal.js' */
+/** @import { HoldingAnimal } from '#server/services/temporary-be4fe/holdings.js' */
 
-/** @type {Step<DraftDeath, object>[]} */
+/**
+ * @typedef {object} Options - what the rules need beyond the animal
+ * @property {HoldingAnimal[]} holdingCattle - the holding's cattle, alive
+ *   and dead
+ * @property {string[]} reportedEarTags - the ids, so ear tag numbers, of the
+ *   report's other animals
+ */
+
+/** @type {Step<DraftDeath, Options>[]} */
 const steps = [
   {
     page: 'is-registered',
@@ -28,7 +38,11 @@ const steps = [
   },
   {
     page: 'registered-animal-details',
-    schema: Joi.object({}),
+    schema: registeredAnimalDetailsSchema,
+    context: ({ holdingCattle, reportedEarTags }) => ({
+      holdingCattle,
+      reportedEarTags
+    }),
     appliesTo: (death) => death.isRegistered === REGISTERED
   },
   {
