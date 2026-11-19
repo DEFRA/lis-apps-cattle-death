@@ -291,6 +291,27 @@ describe('registeredAnimalDetailsController', () => {
       )
     })
 
+    test('it rethrows the conflict of saving to a report already sent', async () => {
+      // Arrange
+      const { h } = toolkit()
+      mocks.saveAnimal.mockRejectedValueOnce(
+        Boom.conflict('The death report has been sent')
+      )
+      const request = requestFor(NEW_ANIMAL, { payload: validAnswers })
+
+      // Act
+      let error
+      try {
+        await registeredAnimalDetailsSubmitController.handler(request, h)
+      } catch (e) {
+        error = e
+      }
+
+      // Assert
+      expect(error.output.statusCode).toBe(409)
+      expect(h.redirect).not.toHaveBeenCalled()
+    })
+
     test('it rethrows a failure to save', async () => {
       // Arrange
       const { h } = toolkit()
