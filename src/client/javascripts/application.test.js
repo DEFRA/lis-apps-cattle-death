@@ -1,26 +1,17 @@
 import { describe, expect, test, vi } from 'vitest'
 
-const {
-  Button,
-  Checkboxes,
-  ErrorSummary,
-  Radios,
-  createAll,
-  LayoutOne,
-  LayoutTwo
-} = vi.hoisted(() => ({
-  Button: class {},
-  Checkboxes: class {},
-  ErrorSummary: class {},
-  Radios: class {},
-  createAll: vi.fn(),
-  LayoutOne: class {},
-  LayoutTwo: class {}
-}))
+const { Button, ErrorSummary, Radios, createAll, LayoutOne, LayoutTwo } =
+  vi.hoisted(() => ({
+    Button: class {},
+    ErrorSummary: class {},
+    Radios: class {},
+    createAll: vi.fn(),
+    LayoutOne: class {},
+    LayoutTwo: class {}
+  }))
 
 vi.mock('govuk-frontend', () => ({
   Button,
-  Checkboxes,
   ErrorSummary,
   Radios,
   createAll
@@ -40,7 +31,6 @@ describe('browser application bootstrap', () => {
       [LayoutOne],
       [LayoutTwo],
       [Button],
-      [Checkboxes],
       [ErrorSummary],
       [Radios]
     ])

@@ -4,7 +4,7 @@ This project is based on the included CDP Node.js frontend template.
 
 Role: Standalone spoke microsite.
 
-Dependencies: @defra/lis-infra-ui-services, @defra/lis-species-cattle, @defra/lis-taxonomy-death
+Dependencies: @defra/lis-infra-ui-services, @defra/lis-species-cattle
 
 Port: `8085`
 
