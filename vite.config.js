@@ -25,13 +25,7 @@ export default defineConfig({
       scss: {
         api: 'modern-compiler',
         importers: [new NodePackageImporter(dirname)],
-        loadPaths: [
-          'node_modules',
-          'src/client/stylesheets',
-          'src/server',
-          'src/server/common/components',
-          'src/server/common/templates/partials'
-        ],
+        loadPaths: ['node_modules', 'src/client/stylesheets', 'src/server'],
         quietDeps: true,
         sourceMapIncludeSources: true,
         style: 'expanded'

@@ -1,26 +1,22 @@
 import { describe, expect, test, vi } from 'vitest'
 
-const {
-  Button,
-  Checkboxes,
-  ErrorSummary,
-  Radios,
-  createAll,
-  LayoutOne,
-  LayoutTwo
-} = vi.hoisted(() => ({
-  Button: class {},
-  Checkboxes: class {},
-  ErrorSummary: class {},
-  Radios: class {},
-  createAll: vi.fn(),
-  LayoutOne: class {},
-  LayoutTwo: class {}
+const { Button, ErrorSummary, Radios, createAll, LayoutOne, LayoutTwo } =
+  vi.hoisted(() => ({
+    Button: class {},
+    ErrorSummary: class {},
+    Radios: class {},
+    createAll: vi.fn(),
+    LayoutOne: class {},
+    LayoutTwo: class {}
+  }))
+
+const { initAllAutocompletes, DatePicker } = vi.hoisted(() => ({
+  initAllAutocompletes: vi.fn(),
+  DatePicker: class {}
 }))
 
 vi.mock('govuk-frontend', () => ({
   Button,
-  Checkboxes,
   ErrorSummary,
   Radios,
   createAll
@@ -31,6 +27,12 @@ vi.mock('@defra/lis-infra-ui-services/components/layout', () => ({
 vi.mock('@defra/lis-infra-ui-services/components/error-pages', () => ({
   errorPageComponents: [Button, LayoutTwo]
 }))
+vi.mock('@defra/lis-infra-ui-services/components/autocomplete', () => ({
+  initAllAutocompletes
+}))
+vi.mock('@defra/lis-infra-ui-services/components/date-picker', () => ({
+  DatePicker
+}))
 
 describe('browser application bootstrap', () => {
   test('starts each shared layout component, each error page component, then each page-level GOV.UK component, starting a component listed in both shared lists once', async () => {
@@ -40,9 +42,10 @@ describe('browser application bootstrap', () => {
       [LayoutOne],
       [LayoutTwo],
       [Button],
-      [Checkboxes],
+      [DatePicker],
       [ErrorSummary],
       [Radios]
     ])
+    expect(initAllAutocompletes).toHaveBeenCalledOnce()
   })
 })
