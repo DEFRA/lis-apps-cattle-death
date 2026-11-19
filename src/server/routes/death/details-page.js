@@ -3,8 +3,14 @@ import { trimAnswers } from '@defra/lis-infra-ui-services/journey'
 
 import * as animalClient from '#server/services/temporary-be4fe/animal.js'
 import { deathReport } from '#server/journeys/death/report.js'
-import { answersOf, asBranch } from './animal-answers.js'
+import {
+  animalsBeforeNew,
+  answersOf,
+  asBranch,
+  isFull
+} from './animal-answers.js'
 import { pathAfterSave } from './check-return.js'
+import { submissionPath } from './paths.js'
 import { reportOf } from './report-key.js'
 
 /** @import { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi' */
@@ -28,18 +34,22 @@ import { reportOf } from './report-key.js'
  */
 
 /**
- * The animal as the page has it, with what its rules are judged against.
+ * The animal as the page has it, with what its rules are judged against;
+ * nothing for a new animal the report has no room for.
  * @param {DetailsPage} details
  * @param {Request} request
- * @returns {Promise<{ animal: DraftDeath, context: Options }>}
+ * @returns {Promise<{ animal: DraftDeath, context: Options } | undefined>}
  */
 async function animalOnPage(details, request) {
-  const [death, context] = await Promise.all([
+  const [death, context, animalsBefore] = await Promise.all([
     answersOf(request),
-    details.rulesContext(request)
+    details.rulesContext(request),
+    animalsBeforeNew(request)
   ])
 
-  return { animal: asBranch(death, details.isRegistered), context }
+  return isFull(animalsBefore)
+    ? undefined
+    : { animal: asBranch(death, details.isRegistered), context }
 }
 
 /**
@@ -50,7 +60,14 @@ async function animalOnPage(details, request) {
  * @returns {Promise<ResponseObject>}
  */
 export async function showDetails(details, request, h) {
-  const { animal, context } = await animalOnPage(details, request)
+  const { cph, submissionId } = request.params
+  const onPage = await animalOnPage(details, request)
+
+  if (!onPage) {
+    return h.redirect(submissionPath(cph, submissionId))
+  }
+
+  const { animal, context } = onPage
 
   return h.view(
     details.template,
@@ -71,8 +88,15 @@ export async function showDetails(details, request, h) {
  * @returns {Promise<ResponseObject>}
  */
 export async function saveDetails(details, request, h) {
+  const { cph, submissionId } = request.params
   const values = trimAnswers(details.formValuesFrom(request.payload))
-  const { animal, context } = await animalOnPage(details, request)
+  const onPage = await animalOnPage(details, request)
+
+  if (!onPage) {
+    return h.redirect(submissionPath(cph, submissionId))
+  }
+
+  const { animal, context } = onPage
   const { errors } = deathReport.validateStep(
     details.page,
     animal,

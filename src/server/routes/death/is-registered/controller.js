@@ -1,12 +1,10 @@
 import { statusCodes } from '@defra/lis-infra-ui-services/status-codes'
 import { trimAnswers } from '@defra/lis-infra-ui-services/journey'
 
-import * as submissionClient from '#server/services/temporary-be4fe/submission.js'
 import { deathReport } from '#server/journeys/death/report.js'
-import { answersOf } from '../animal-answers.js'
+import { animalsBeforeNew, answersOf, isFull } from '../animal-answers.js'
 import { CHECK_PAGE, isReturningToCheck, keepReturn } from '../check-return.js'
-import { animalPagePath, newAnimalPath } from '../paths.js'
-import { reportOf } from '../report-key.js'
+import { animalPagePath, newAnimalPath, submissionPath } from '../paths.js'
 import {
   buildViewModel,
   formValuesFrom,
@@ -17,21 +15,6 @@ import {
 /** @import { DraftDeath } from '#server/services/temporary-be4fe/animal.js' */
 
 const TEMPLATE = 'death/is-registered/index'
-
-/**
- * @param {Request} request
- * @returns {Promise<boolean>} whether the animal is a new one in a report
- *   with none, where the report starts
- */
-async function isFirstAnimal(request) {
-  if (request.params.animalId !== undefined) {
-    return false
-  }
-
-  const { animals } = await submissionClient.getSubmission(reportOf(request))
-
-  return animals.length === 0
-}
 
 /**
  * Nothing is saved here: an animal is saved with its details, so the answer
@@ -73,17 +56,22 @@ export const isRegisteredController = {
    * @returns {Promise<ResponseObject>} the response
    */
   async handler(request, h) {
-    const [death, isFirst] = await Promise.all([
+    const { cph, submissionId } = request.params
+    const [death, animalsBefore] = await Promise.all([
       answersOf(request),
-      isFirstAnimal(request)
+      animalsBeforeNew(request)
     ])
+
+    if (isFull(animalsBefore)) {
+      return h.redirect(submissionPath(cph, submissionId))
+    }
 
     return h.view(
       TEMPLATE,
       buildViewModel({
         request,
         values: formValuesFrom(death),
-        isFirstAnimal: isFirst
+        isFirstAnimal: animalsBefore === 0
       })
     )
   }
@@ -98,11 +86,17 @@ export const isRegisteredSubmitController = {
    * @returns {Promise<ResponseObject>} the response
    */
   async handler(request, h) {
+    const { cph, submissionId } = request.params
     const values = trimAnswers(formValuesFrom(request.payload))
-    const [death, isFirst] = await Promise.all([
+    const [death, animalsBefore] = await Promise.all([
       answersOf(request),
-      isFirstAnimal(request)
+      animalsBeforeNew(request)
     ])
+
+    if (isFull(animalsBefore)) {
+      return h.redirect(submissionPath(cph, submissionId))
+    }
+
     const { errors } = deathReport.validateStep(
       IS_REGISTERED_PAGE,
       death,
@@ -113,7 +107,12 @@ export const isRegisteredSubmitController = {
       return h
         .view(
           TEMPLATE,
-          buildViewModel({ request, values, errors, isFirstAnimal: isFirst })
+          buildViewModel({
+            request,
+            values,
+            errors,
+            isFirstAnimal: animalsBefore === 0
+          })
         )
         .code(statusCodes.badRequest)
     }

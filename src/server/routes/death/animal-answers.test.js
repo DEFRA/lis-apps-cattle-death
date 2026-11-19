@@ -1,6 +1,12 @@
 import * as animalClient from '#server/services/temporary-be4fe/animal.js'
 import * as submissionClient from '#server/services/temporary-be4fe/submission.js'
-import { answersOf, asBranch, reportedEarTagsOf } from './animal-answers.js'
+import {
+  animalsBeforeNew,
+  answersOf,
+  asBranch,
+  isFull,
+  reportedEarTagsOf
+} from './animal-answers.js'
 
 vi.mock('#server/services/temporary-be4fe/animal.js')
 vi.mock('#server/services/temporary-be4fe/submission.js')
@@ -106,6 +112,52 @@ describe('animal-answers', () => {
 
       // Assert
       expect(earTags).toEqual(['UK123456301550'])
+    })
+  })
+
+  describe('animalsBeforeNew()', () => {
+    test('it counts the report animals for a new one', async () => {
+      // Arrange
+      const request = { params: REPORT, auth }
+      mocks.getSubmission.mockResolvedValueOnce({
+        animals: [{ animalId: 'UK123456301550' }]
+      })
+
+      // Act
+      const count = await animalsBeforeNew(request)
+
+      // Assert
+      expect(count).toBe(1)
+    })
+
+    test('it asks nothing for a saved animal', async () => {
+      // Arrange
+      const request = {
+        params: { ...REPORT, animalId: 'UK123456301550' },
+        auth
+      }
+
+      // Act
+      const count = await animalsBeforeNew(request)
+
+      // Assert
+      expect(count).toBeUndefined()
+      expect(mocks.getSubmission).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('isFull()', () => {
+    test.each([
+      [undefined, false],
+      [49, false],
+      [50, true]
+    ])('it gives %j animals before as %j', (animalsBefore, expected) => {
+      // Arrange
+      // Act
+      const result = isFull(animalsBefore)
+
+      // Assert
+      expect(result).toBe(expected)
     })
   })
 })

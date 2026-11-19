@@ -2,6 +2,7 @@ import Boom from '@hapi/boom'
 
 import * as animalClient from '#server/services/temporary-be4fe/animal.js'
 import * as dataClient from '#server/services/temporary-be4fe/data.js'
+import * as submissionClient from '#server/services/temporary-be4fe/submission.js'
 import {
   unregisteredAnimalDetailsController,
   unregisteredAnimalDetailsSubmitController
@@ -9,6 +10,7 @@ import {
 
 vi.mock('#server/services/temporary-be4fe/animal.js')
 vi.mock('#server/services/temporary-be4fe/data.js')
+vi.mock('#server/services/temporary-be4fe/submission.js')
 
 const TEMPLATE = 'death/unregistered-animal-details/index'
 const NEW_ANIMAL = { cph: '10/081/1234', submissionId: '7ZK-M3Q-A9D' }
@@ -37,7 +39,8 @@ const saved = {
 const mocks = {
   getAnimal: vi.mocked(animalClient.getAnimal),
   saveAnimal: vi.mocked(animalClient.saveAnimal),
-  getUnusedEarTags: vi.mocked(dataClient.getUnusedEarTags)
+  getUnusedEarTags: vi.mocked(dataClient.getUnusedEarTags),
+  getSubmission: vi.mocked(submissionClient.getSubmission)
 }
 
 /**
@@ -71,6 +74,7 @@ describe('unregisteredAnimalDetailsController', () => {
       'UK123456401562'
     ])
     mocks.saveAnimal.mockResolvedValue({ animalId: 'UK123456401561' })
+    mocks.getSubmission.mockResolvedValue({ animals: [] })
   })
 
   afterEach(() => {
@@ -227,6 +231,24 @@ describe('unregisteredAnimalDetailsController', () => {
       )
       expect(response.code).toHaveBeenCalledWith(400)
       expect(mocks.saveAnimal).not.toHaveBeenCalled()
+    })
+
+    test('it saves no new animal once the report has 50, returning to the list of animals', async () => {
+      // Arrange
+      const { h } = toolkit()
+      mocks.getSubmission.mockResolvedValueOnce({
+        animals: Array.from({ length: 50 }, (_, index) => ({
+          animalId: `UK1234564${String(index).padStart(5, '0')}`
+        }))
+      })
+      const request = requestFor(NEW_ANIMAL, { payload: validAnswers })
+
+      // Act
+      await unregisteredAnimalDetailsSubmitController.handler(request, h)
+
+      // Assert
+      expect(mocks.saveAnimal).not.toHaveBeenCalled()
+      expect(h.redirect).toHaveBeenCalledWith(REPORT_PATH)
     })
 
     test('it rethrows a failure to save', async () => {
