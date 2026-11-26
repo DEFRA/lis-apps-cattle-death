@@ -4,6 +4,7 @@ import Joi from 'joi'
 import { DEATH_ROUTE } from './paths.js'
 import { echoed } from './form-limits.js'
 import { demandDeathAccess } from './holding-access.js'
+import { demandUnsentReport } from './sent-report.js'
 import { startReportController } from './start/controller.js'
 import {
   isRegisteredController,
@@ -25,6 +26,11 @@ import {
   tagListController,
   tagListSubmitController
 } from './tag-list/controller.js'
+import {
+  submitReportController,
+  submitReportSubmitController
+} from './submit/controller.js'
+import { confirmationController } from './confirmation/controller.js'
 
 /** @import { Server } from '@hapi/hapi' */
 
@@ -104,6 +110,12 @@ const unregisteredDetailsPayload = Joi.object({
   breed: formField
 }).options({ stripUnknown: true })
 
+// Every page of a report but its confirmation closes once it is sent
+const reportPre = [
+  { method: demandDeathAccess },
+  { method: demandUnsentReport }
+]
+
 /**
  * @param {string} path
  * @param {object} params - the route's params validation
@@ -120,7 +132,7 @@ function pageRoutes(path, params, controller, submitController, payload) {
       ...controller,
       options: {
         validate: params,
-        pre: [{ method: demandDeathAccess }]
+        pre: reportPre
       }
     },
     {
@@ -129,7 +141,7 @@ function pageRoutes(path, params, controller, submitController, payload) {
       ...submitController,
       options: {
         validate: { ...params, payload },
-        pre: [{ method: demandDeathAccess }]
+        pre: reportPre
       }
     }
   ]
@@ -202,7 +214,7 @@ const routes = [
     ...checkAnimalDetailsController,
     options: {
       validate: animalParams,
-      pre: [{ method: demandDeathAccess }]
+      pre: reportPre
     }
   },
   {
@@ -211,6 +223,33 @@ const routes = [
     ...checkAnimalDetailsSubmitController,
     options: {
       validate: animalParams,
+      pre: reportPre
+    }
+  },
+  {
+    method: 'GET',
+    path: `${DEATH_ROUTE}/{submissionId}/submit`,
+    ...submitReportController,
+    options: {
+      validate: submissionParams,
+      pre: reportPre
+    }
+  },
+  {
+    method: 'POST',
+    path: `${DEATH_ROUTE}/{submissionId}/submit`,
+    ...submitReportSubmitController,
+    options: {
+      validate: submissionParams,
+      pre: reportPre
+    }
+  },
+  {
+    method: 'GET',
+    path: `${DEATH_ROUTE}/{submissionId}/confirmation`,
+    ...confirmationController,
+    options: {
+      validate: submissionParams,
       pre: [{ method: demandDeathAccess }]
     }
   },
