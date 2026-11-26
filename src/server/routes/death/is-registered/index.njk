@@ -1,0 +1,49 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "form/macro.njk" import lisForm with context %}
+
+{% block beforeContent %}
+  {{ govukBackLink({
+    text: "Back",
+    href: backLinkHref
+  }) }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% if errorList.length %}
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: errorList
+        }) }}
+      {% endif %}
+
+      {% call lisForm({ action: formAction }) %}
+        {{ govukRadios({
+          classes: "govuk-radios--inline",
+          idPrefix: "isRegistered",
+          name: "isRegistered",
+          fieldset: {
+            legend: {
+              text: heading,
+              isPageHeading: true,
+              classes: "govuk-fieldset__legend--l"
+            }
+          },
+          errorMessage: fieldErrors.isRegistered,
+          items: [
+            { value: "yes", text: "Yes", checked: values.isRegistered == "yes" },
+            { value: "no", text: "No", checked: values.isRegistered == "no" }
+          ]
+        }) }}
+
+        {{ govukButton({
+          text: "Continue",
+          preventDoubleClick: true
+        }) }}
+      {% endcall %}
+    </div>
+  </div>
+{% endblock %}

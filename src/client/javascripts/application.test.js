@@ -10,6 +10,11 @@ const { Button, ErrorSummary, Radios, createAll, LayoutOne, LayoutTwo } =
     LayoutTwo: class {}
   }))
 
+const { initAllAutocompletes, DatePicker } = vi.hoisted(() => ({
+  initAllAutocompletes: vi.fn(),
+  DatePicker: class {}
+}))
+
 vi.mock('govuk-frontend', () => ({
   Button,
   ErrorSummary,
@@ -22,6 +27,12 @@ vi.mock('@defra/lis-infra-ui-services/components/layout', () => ({
 vi.mock('@defra/lis-infra-ui-services/components/error-pages', () => ({
   errorPageComponents: [Button, LayoutTwo]
 }))
+vi.mock('@defra/lis-infra-ui-services/components/autocomplete', () => ({
+  initAllAutocompletes
+}))
+vi.mock('@defra/lis-infra-ui-services/components/date-picker', () => ({
+  DatePicker
+}))
 
 describe('browser application bootstrap', () => {
   test('starts each shared layout component, each error page component, then each page-level GOV.UK component, starting a component listed in both shared lists once', async () => {
@@ -31,8 +42,10 @@ describe('browser application bootstrap', () => {
       [LayoutOne],
       [LayoutTwo],
       [Button],
+      [DatePicker],
       [ErrorSummary],
       [Radios]
     ])
+    expect(initAllAutocompletes).toHaveBeenCalledOnce()
   })
 })
