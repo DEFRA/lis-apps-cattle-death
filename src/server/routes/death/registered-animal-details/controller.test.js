@@ -141,6 +141,26 @@ describe('registeredAnimalDetailsController', () => {
       )
     })
 
+    test('it shows no new animal once the report has 50, returning to the list of animals', async () => {
+      // Arrange
+      const { h } = toolkit()
+      const full = {
+        animals: Array.from({ length: 50 }, (_, index) => ({
+          animalId: `UK1234564${String(index).padStart(5, '0')}`
+        }))
+      }
+      // Asked once for the ear tags already reported, once for the room left
+      mocks.getSubmission.mockResolvedValueOnce(full)
+      mocks.getSubmission.mockResolvedValueOnce(full)
+
+      // Act
+      await registeredAnimalDetailsController.handler(requestFor(NEW_ANIMAL), h)
+
+      // Assert
+      expect(h.view).not.toHaveBeenCalled()
+      expect(h.redirect).toHaveBeenCalledWith(REPORT_PATH)
+    })
+
     test('it propagates not found for an animal the report does not have', async () => {
       // Arrange
       const { h } = toolkit()

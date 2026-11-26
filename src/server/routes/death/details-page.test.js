@@ -1,7 +1,9 @@
 import * as animalClient from '#server/services/be4fe/animal.js'
+import * as submissionClient from '#server/services/be4fe/submission.js'
 import { saveDetails, showDetails } from './details-page.js'
 
 vi.mock('#server/services/be4fe/animal.js')
+vi.mock('#server/services/be4fe/submission.js')
 
 const NEW_ANIMAL = { cph: '10/081/1234', submissionId: '7ZK-M3Q-A9D' }
 const REPORT_PATH = '/holdings/10/081/1234/cattle/death/7ZK-M3Q-A9D'
@@ -14,7 +16,8 @@ const context = {
 }
 
 const mocks = {
-  saveAnimal: vi.mocked(animalClient.saveAnimal)
+  saveAnimal: vi.mocked(animalClient.saveAnimal),
+  getSubmission: vi.mocked(submissionClient.getSubmission)
 }
 
 /**
@@ -58,7 +61,17 @@ function toolkit() {
   return { h, response }
 }
 
+const fullReport = {
+  animals: Array.from({ length: 50 }, (_, index) => ({
+    animalId: `UK1234564${String(index).padStart(5, '0')}`
+  }))
+}
+
 describe('animal details page', () => {
+  beforeEach(() => {
+    mocks.getSubmission.mockResolvedValueOnce({ animals: [] })
+  })
+
   afterEach(() => {
     vi.resetAllMocks()
   })
@@ -87,6 +100,20 @@ describe('animal details page', () => {
         'death/registered-animal-details/index',
         'the view model'
       )
+    })
+
+    test('it shows no new animal once the report has 50, returning to the list of animals', async () => {
+      // Arrange
+      const { h } = toolkit()
+      mocks.getSubmission.mockReset()
+      mocks.getSubmission.mockResolvedValueOnce(fullReport)
+
+      // Act
+      await showDetails(registeredDetails(), requestFor(), h)
+
+      // Assert
+      expect(h.view).not.toHaveBeenCalled()
+      expect(h.redirect).toHaveBeenCalledWith(REPORT_PATH)
     })
   })
 
@@ -140,6 +167,24 @@ describe('animal details page', () => {
       })
       expect(response.code).toHaveBeenCalledWith(400)
       expect(mocks.saveAnimal).not.toHaveBeenCalled()
+    })
+
+    test('it saves no new animal once the report has 50, returning to the list of animals', async () => {
+      // Arrange
+      const { h } = toolkit()
+      mocks.getSubmission.mockReset()
+      mocks.getSubmission.mockResolvedValueOnce(fullReport)
+      const request = requestFor({
+        earTagNumber: 'UK123456301551',
+        dateOfDeath: TODAY
+      })
+
+      // Act
+      await saveDetails(registeredDetails(), request, h)
+
+      // Assert
+      expect(mocks.saveAnimal).not.toHaveBeenCalled()
+      expect(h.redirect).toHaveBeenCalledWith(REPORT_PATH)
     })
   })
 })
