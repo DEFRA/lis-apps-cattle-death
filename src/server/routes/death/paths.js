@@ -60,3 +60,15 @@ export function newAnimalPath(cph, submissionId, page) {
 export function holdingHomePath(cph) {
   return getMountPath('cattle-home', 'holding', { cph })
 }
+
+/**
+ * @param {{ cph: string, submissionId: string, animalId?: string }} params
+ * @param {string} page
+ * @returns {string} the path of a page about an animal: the report's own
+ *   page for one it has, otherwise a new animal's
+ */
+export function animalOrNewPath({ cph, submissionId, animalId }, page) {
+  return animalId
+    ? animalPagePath(cph, submissionId, animalId, page)
+    : newAnimalPath(cph, submissionId, page)
+}
