@@ -17,6 +17,10 @@ import {
   unregisteredAnimalDetailsController,
   unregisteredAnimalDetailsSubmitController
 } from './unregistered-animal-details/controller.js'
+import {
+  checkAnimalDetailsController,
+  checkAnimalDetailsSubmitController
+} from './check-animal-details/controller.js'
 
 /** @import { Server } from '@hapi/hapi' */
 
@@ -183,7 +187,25 @@ const routes = [
     unregisteredAnimalDetailsController,
     unregisteredAnimalDetailsSubmitController,
     unregisteredDetailsPayload
-  )
+  ),
+  {
+    method: 'GET',
+    path: `${ANIMAL_ROUTE}/check-animal-details`,
+    ...checkAnimalDetailsController,
+    options: {
+      validate: animalParams,
+      pre: [{ method: demandDeathAccess }]
+    }
+  },
+  {
+    method: 'POST',
+    path: `${ANIMAL_ROUTE}/check-animal-details`,
+    ...checkAnimalDetailsSubmitController,
+    options: {
+      validate: animalParams,
+      pre: [{ method: demandDeathAccess }]
+    }
+  }
 ]
 
 export const death = {
