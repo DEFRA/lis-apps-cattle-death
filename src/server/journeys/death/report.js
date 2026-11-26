@@ -3,10 +3,10 @@
  * answers so far. Each step's rules are in this directory, one file per
  * step.
  */
-import Joi from 'joi'
 import { createJourney } from '@defra/lis-infra-ui-services/journey'
 
 import { registeredAnimalDetailsSchema } from './registered-animal-details.js'
+import { unregisteredAnimalDetailsSchema } from './unregistered-animal-details.js'
 import {
   isRegisteredSchema,
   REGISTERED,
@@ -22,6 +22,8 @@ import {
  * @property {HoldingAnimal[]} holdingCattle - the cattle on the holding
  * @property {string[]} reportedEarTags - the ids, so ear tag numbers, of the
  *   report's other animals
+ * @property {string[]} unusedEarTags - the ear tags issued to the holding
+ *   that are not on an animal, nor on another animal of the report
  */
 
 /** @type {Step<DraftDeath, Options>[]} */
@@ -46,7 +48,12 @@ const steps = [
   },
   {
     page: 'unregistered-animal-details',
-    schema: Joi.object({}),
+    schema: unregisteredAnimalDetailsSchema,
+    // An animal keeps the ear tag it has: the unused ones leave it out
+    context: ({ unusedEarTags, reportedEarTags }, saved) => ({
+      availableEarTags: [...unusedEarTags, saved.earTagNumber ?? ''],
+      reportedEarTags
+    }),
     appliesTo: (death) => death.isRegistered === UNREGISTERED
   }
 ]
