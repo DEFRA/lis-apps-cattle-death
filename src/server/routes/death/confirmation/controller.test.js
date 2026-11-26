@@ -46,7 +46,7 @@ describe('confirmationController', () => {
     })
     expect(h.view).toHaveBeenCalledWith(
       'death/confirmation/index',
-      expect.objectContaining({ heading: '2 cattle deaths reported' })
+      expect.objectContaining({ heading: '2 deaths reported' })
     )
     expect(result).toBe('viewed')
   })

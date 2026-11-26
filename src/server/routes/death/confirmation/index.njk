@@ -7,11 +7,13 @@
         titleText: heading
       }) }}
 
-      <p class="govuk-body">We have received your report of death.</p>
+      <p class="govuk-body">{{ received }}</p>
 
       <h2 class="govuk-heading-m">What happens next</h2>
 
-      <p class="govuk-body">Your records will be updated to reflect the status of the animal.</p>
+      <p class="govuk-body">Animal updates may take up to 24 hours to appear in your cattle on holding list.</p>
+
+      <p class="govuk-body">{{ reviewed }}</p>
 
       {{ govukButton({
         text: "Return to the homepage",
