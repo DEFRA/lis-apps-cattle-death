@@ -30,6 +30,6 @@ describe('#router', () => {
       })
     )
     expect(server.register).toHaveBeenNthCalledWith(1, [inert, spokeAuthPlugin])
-    expect(server.register.mock.calls[1][0]).toHaveLength(2)
+    expect(server.register.mock.calls[1][0]).toHaveLength(1)
   })
 })
