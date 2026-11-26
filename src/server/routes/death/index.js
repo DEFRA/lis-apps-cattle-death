@@ -9,6 +9,10 @@ import {
   isRegisteredController,
   isRegisteredSubmitController
 } from './is-registered/controller.js'
+import {
+  registeredAnimalDetailsController,
+  registeredAnimalDetailsSubmitController
+} from './registered-animal-details/controller.js'
 
 /** @import { Server } from '@hapi/hapi' */
 
@@ -71,33 +75,62 @@ const isRegisteredPayload = Joi.object({
   isRegistered: formField
 }).options({ stripUnknown: true })
 
+const registeredDetailsPayload = Joi.object({
+  earTagNumber: formField,
+  dateOfDeath: formField
+}).options({ stripUnknown: true })
+
+/**
+ * @param {string} path
+ * @param {object} params - the route's params validation
+ * @param {object} controller - the page's GET controller
+ * @param {object} submitController - the page's POST controller
+ * @param {object} payload - the page's form validation
+ * @returns {object[]} the page's GET and POST routes
+ */
+function pageRoutes(path, params, controller, submitController, payload) {
+  return [
+    {
+      method: 'GET',
+      path,
+      ...controller,
+      options: {
+        validate: params,
+        pre: [{ method: demandDeathAccess }]
+      }
+    },
+    {
+      method: 'POST',
+      path,
+      ...submitController,
+      options: {
+        validate: { ...params, payload },
+        pre: [{ method: demandDeathAccess }]
+      }
+    }
+  ]
+}
+
 const ANIMALS_ROUTE = `${DEATH_ROUTE}/{submissionId}/animals`
 const ANIMAL_ROUTE = `${ANIMALS_ROUTE}/{animalId}`
 
 // An animal has no id until its details, and so its ear tag number, are
 // saved
 const newAnimalRoutes = [
-  {
-    method: 'GET',
-    path: `${ANIMALS_ROUTE}/is-registered`,
-    ...isRegisteredController,
-    options: {
-      validate: submissionParams,
-      pre: [{ method: demandDeathAccess }]
-    }
-  },
-  {
-    method: 'POST',
-    path: `${ANIMALS_ROUTE}/is-registered`,
-    ...isRegisteredSubmitController,
-    options: {
-      validate: {
-        ...submissionParams,
-        payload: isRegisteredPayload
-      },
-      pre: [{ method: demandDeathAccess }]
-    }
-  }
+  ...pageRoutes(
+    `${ANIMALS_ROUTE}/is-registered`,
+    submissionParams,
+    isRegisteredController,
+    isRegisteredSubmitController,
+    isRegisteredPayload
+  ),
+  ...pageRoutes(
+    `${ANIMALS_ROUTE}/registered-animal-details`,
+    submissionParams,
+    registeredAnimalDetailsController,
+    registeredAnimalDetailsSubmitController,
+    registeredDetailsPayload
+  )
 ]
 
 const routes = [
@@ -111,27 +144,20 @@ const routes = [
     }
   },
   ...newAnimalRoutes,
-  {
-    method: 'GET',
-    path: `${ANIMAL_ROUTE}/is-registered`,
-    ...isRegisteredController,
-    options: {
-      validate: animalParams,
-      pre: [{ method: demandDeathAccess }]
-    }
-  },
-  {
-    method: 'POST',
-    path: `${ANIMAL_ROUTE}/is-registered`,
-    ...isRegisteredSubmitController,
-    options: {
-      validate: {
-        ...animalParams,
-        payload: isRegisteredPayload
-      },
-      pre: [{ method: demandDeathAccess }]
-    }
-  }
+  ...pageRoutes(
+    `${ANIMAL_ROUTE}/is-registered`,
+    animalParams,
+    isRegisteredController,
+    isRegisteredSubmitController,
+    isRegisteredPayload
+  ),
+  ...pageRoutes(
+    `${ANIMAL_ROUTE}/registered-animal-details`,
+    animalParams,
+    registeredAnimalDetailsController,
+    registeredAnimalDetailsSubmitController,
+    registeredDetailsPayload
+  )
 ]
 
 export const death = {
