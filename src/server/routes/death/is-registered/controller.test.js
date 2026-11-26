@@ -121,6 +121,23 @@ describe('isRegisteredController', () => {
       )
     })
 
+    test('it opens no new animal once the report has 50, returning to the list of animals', async () => {
+      // Arrange
+      const { h } = toolkit()
+      mocks.getSubmission.mockResolvedValueOnce({
+        animals: Array.from({ length: 50 }, (_, index) => ({
+          animalId: `UK1234564${String(index).padStart(5, '0')}`
+        }))
+      })
+
+      // Act
+      await isRegisteredController.handler(requestFor(NEW_ANIMAL), h)
+
+      // Assert
+      expect(h.view).not.toHaveBeenCalled()
+      expect(h.redirect).toHaveBeenCalledWith(REPORT_PATH)
+    })
+
     test('it propagates not found for an animal the report does not have', async () => {
       // Arrange
       const { h } = toolkit()

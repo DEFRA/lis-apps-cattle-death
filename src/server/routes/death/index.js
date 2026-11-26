@@ -21,6 +21,10 @@ import {
   checkAnimalDetailsController,
   checkAnimalDetailsSubmitController
 } from './check-animal-details/controller.js'
+import {
+  tagListController,
+  tagListSubmitController
+} from './tag-list/controller.js'
 
 /** @import { Server } from '@hapi/hapi' */
 
@@ -86,6 +90,10 @@ const isRegisteredPayload = Joi.object({
 const registeredDetailsPayload = Joi.object({
   earTagNumber: formField,
   dateOfDeath: formField
+}).options({ stripUnknown: true })
+
+const tagListPayload = Joi.object({
+  addAnother: formField
 }).options({ stripUnknown: true })
 
 const unregisteredDetailsPayload = Joi.object({
@@ -205,7 +213,14 @@ const routes = [
       validate: animalParams,
       pre: [{ method: demandDeathAccess }]
     }
-  }
+  },
+  ...pageRoutes(
+    `${DEATH_ROUTE}/{submissionId}`,
+    submissionParams,
+    tagListController,
+    tagListSubmitController,
+    tagListPayload
+  )
 ]
 
 export const death = {
