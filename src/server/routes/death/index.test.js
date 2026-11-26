@@ -1,5 +1,6 @@
 import { death } from './index.js'
 import { demandDeathAccess } from './holding-access.js'
+import { demandUnsentReport } from './sent-report.js'
 import { MAX_ECHO_LENGTH } from './form-limits.js'
 
 vi.mock('#server/services/be4fe/animal.js')
@@ -49,7 +50,7 @@ const validParams = {
 }
 
 describe('death routes', () => {
-  test('every route demands death access and nothing else', () => {
+  test('every route demands death access, and every page of a report but its confirmation an unsent report', () => {
     // Arrange
     const routes = registeredRoutes()
 
@@ -64,7 +65,9 @@ describe('death routes', () => {
     expect(pres).toEqual(
       routes.map(({ method, path }) => [
         `${method} ${path}`,
-        [demandDeathAccess]
+        path.includes('{submissionId}') && !path.endsWith('/confirmation')
+          ? [demandDeathAccess, demandUnsentReport]
+          : [demandDeathAccess]
       ])
     )
   })

@@ -6,6 +6,7 @@ import * as dataClient from '#server/services/be4fe/data.js'
 import { deathReport } from '#server/journeys/death/report.js'
 import { newAnimalPath, submissionPagePath } from '../paths.js'
 import { reportOf } from '../report-key.js'
+import { SUBMIT_PAGE } from '../submit/view-model.js'
 import { MAX_ANIMALS } from './messages.js'
 import { buildViewModel } from './view-model.js'
 
@@ -16,7 +17,6 @@ import { buildViewModel } from './view-model.js'
  */
 
 const TEMPLATE = 'death/tag-list/index'
-const SUBMIT_PAGE = 'submit'
 
 /**
  * Each animal is judged whole against the holding's cattle and ear tags as
