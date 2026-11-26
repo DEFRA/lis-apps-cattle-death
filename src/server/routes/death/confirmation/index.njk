@@ -1,0 +1,24 @@
+{% extends 'layouts/page.njk' %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {{ govukPanel({
+        titleText: heading
+      }) }}
+
+      <p class="govuk-body">{{ received }}</p>
+
+      <h2 class="govuk-heading-m">What happens next</h2>
+
+      <p class="govuk-body">Animal updates may take up to 24 hours to appear in your cattle on holding list.</p>
+
+      <p class="govuk-body">{{ reviewed }}</p>
+
+      {{ govukButton({
+        text: "Return to the homepage",
+        href: homeHref
+      }) }}
+    </div>
+  </div>
+{% endblock %}
