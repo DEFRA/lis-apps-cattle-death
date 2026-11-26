@@ -13,6 +13,10 @@ import {
   registeredAnimalDetailsController,
   registeredAnimalDetailsSubmitController
 } from './registered-animal-details/controller.js'
+import {
+  unregisteredAnimalDetailsController,
+  unregisteredAnimalDetailsSubmitController
+} from './unregistered-animal-details/controller.js'
 
 /** @import { Server } from '@hapi/hapi' */
 
@@ -80,6 +84,14 @@ const registeredDetailsPayload = Joi.object({
   dateOfDeath: formField
 }).options({ stripUnknown: true })
 
+const unregisteredDetailsPayload = Joi.object({
+  earTagNumber: formField,
+  dateOfBirth: formField,
+  dateOfDeath: formField,
+  sex: formField,
+  breed: formField
+}).options({ stripUnknown: true })
+
 /**
  * @param {string} path
  * @param {object} params - the route's params validation
@@ -130,6 +142,13 @@ const newAnimalRoutes = [
     registeredAnimalDetailsController,
     registeredAnimalDetailsSubmitController,
     registeredDetailsPayload
+  ),
+  ...pageRoutes(
+    `${ANIMALS_ROUTE}/unregistered-animal-details`,
+    submissionParams,
+    unregisteredAnimalDetailsController,
+    unregisteredAnimalDetailsSubmitController,
+    unregisteredDetailsPayload
   )
 ]
 
@@ -157,6 +176,13 @@ const routes = [
     registeredAnimalDetailsController,
     registeredAnimalDetailsSubmitController,
     registeredDetailsPayload
+  ),
+  ...pageRoutes(
+    `${ANIMAL_ROUTE}/unregistered-animal-details`,
+    animalParams,
+    unregisteredAnimalDetailsController,
+    unregisteredAnimalDetailsSubmitController,
+    unregisteredDetailsPayload
   )
 ]
 

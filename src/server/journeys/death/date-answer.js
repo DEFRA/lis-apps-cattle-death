@@ -30,7 +30,7 @@ export function parsedDate(value) {
  * @param {object} helpers - Joi's
  * @returns {string | object} the date, or the Joi error
  */
-function checkPastDate(value, helpers) {
+export function checkPastDate(value, helpers) {
   const date = parsedDate(value)
 
   if (!date) {
