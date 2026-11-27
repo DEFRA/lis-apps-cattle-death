@@ -71,9 +71,9 @@ cp .env.example .env
 ```
 
 `.env` is loaded when running standalone, and also by a sideloaded `npm run dev` for variables that
-compose does not set. It sets the public local development `HUB_JWT_SECRET` that the lis-dev hubs
-use. Set `CATTLE_DEATH_API_KEY` to the key that `lis-be4fe-cattle-death` accepts
-(`local-dev-cattle-death-api-key` in lis-dev).
+compose does not set. It sets `PORT=3207` (the lis-dev port), the lis-dev API key for
+`lis-be4fe-cattle-death`, the public local development `HUB_JWT_SECRET` that the lis-dev hubs use,
+and the fake STS values `CDP_JWT_ISSUER` and `CDP_JWT_JWKS_URI` (lis-dev's `lis-fake-sts`).
 
 Tests use [Vitest](https://vitest.dev/). There are no tools to install beyond `npm install`.
 
